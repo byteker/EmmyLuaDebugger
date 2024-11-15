@@ -1,7 +1,10 @@
 name: Emmy Debugger Core
 
-on: [push]
-
+on:
+  workflow_dispatch: # 允许手动触发
+  push:
+    branches:
+      - dev
 jobs:
   build:
     runs-on: ${{ matrix.os }}
