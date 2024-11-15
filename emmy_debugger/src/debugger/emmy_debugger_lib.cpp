@@ -133,12 +133,6 @@ int registerTypeName(lua_State* L)
 //emmy.captureOutput(): void
 int captureOutput(lua_State* L)
 {
-    lua_pushcfunction(L, custom_print); // 将自定义函数压入栈顶
-    lua_setglobal(L, "print");          // 将栈顶函数设置为全局的 print
-	return 0;
-}
-
-int custom_print(lua_State *L) {
     int nargs = lua_gettop(L); // 获取传入参数的个数
     for (int i = 1; i <= nargs; i++) {
         if (luaL_checkstring(L, i)) { // 检查参数是否为字符串
