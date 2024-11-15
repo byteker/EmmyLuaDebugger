@@ -34,9 +34,14 @@ int stop(lua_State* L);
 // emmy.registerTypeName(typeName: string): bool
 int registerTypeName(lua_State* L);
 
-//emmy.redirectPrint(): void
-int redirectPrint(lua_State* L);
+//emmy.printConsole(type:LogType,output:string): void
+int printConsole(lua_State* L);
 
+//emmy.hook_print(...): void
+int hook_print(lua_State* L);
+
+////emmy.override_lua_print(): void
+int override_lua_print(lua_State *L);
 
 bool install_emmy_debugger(struct lua_State* L);
 

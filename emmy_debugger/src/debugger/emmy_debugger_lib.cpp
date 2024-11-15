@@ -57,7 +57,7 @@ int tryTcpConnect(lua_State* L)
 	const auto host = lua_tostring(L, 1);
 	luaL_checknumber(L, 2);
 	const auto port = lua_tointeger(L, 2);
-	const auto suc = EmmyFacade::Get().TcpConnect(L, host, static_cast<int>(port), err);
+	const auto suc = EmmyFacade::Get().TryTcpConnect(L, host, static_cast<int>(port), err);
 	lua_pushboolean(L, suc);
 	if (suc) return 1;
 	// lua_pushstring(L, err.c_str());
@@ -146,37 +146,39 @@ int registerTypeName(lua_State* L)
 	return 2;
 }
 
-//emmy.redirectPrint(...): void
-int redirectPrint(lua_State* L) {
-    int n = lua_gettop(L); // 获取栈顶元素数量
-    if (n == 0) {
-        return 0;
-    }
+//emmy.printConsole(type:LogType,output:string): void
+int printConsole(lua_State* L) {
+	luaL_checknumber(L, 1);
+	luaL_checkstring(L, 2);
+	const auto type = static_cast<LogType>(lua_tonumber(L, 1));
+	const auto output = lua_tostring(L, 2);
+	EmmyFacade::Get().SendLog(type, output);
+}
 
-    // 获取调试信息以提取文件路径和行号
-    lua_Debug ar;
-    if (lua_getstack(L, 1, &ar) && lua_getinfo(L, "Sl", &ar)) {
-        const char* file = getDebugSource(&ar);
-        int line = getDebugCurrentLine(&ar);
-        // 将文件路径和行号作为前缀加入日志
-        EmmyFacade::Get().SendLog(LogType::Info, "[%s:%d] ", file, line);
-    } else {
-        EmmyFacade::Get().SendLog(LogType::Info, "[unknown:0] ");
-    }
+//emmy.hook_print(...): void
+int hook_print(lua_State* L) {
+  int n = lua_gettop(L);  /* number of arguments */
+  int i;
+  lua_getglobal(L, "tostring");
+  std::string output;
+  for (i=1; i<=n; i++) {
+    const char *s;
+    size_t l;
+    lua_pushvalue(L, -1);  /* function to be called */
+    lua_pushvalue(L, i);   /* value to print */
+    lua_call(L, 1, 1);
+    s = lua_tolstring(L, -1, &l);  /* get result */
+	output += s;
+    lua_pop(L, 1);  /* pop result */
+  }
+  return 0;
+}
 
-    lua_getglobal(L, "print"); // 获取全局的 print 函数
-    if (lua_isnil(L, -1)) {
-        EmmyFacade::Get().SendLog(LogType::Error, "Global 'print' function is missing");
-        return 0;
-    }
-
-    lua_insert(L, 1); // 将 print 函数插入到栈底
-    if (lua_pcall(L, n, 0, 0) != LUA_OK) {
-        const char *str = lua_tostring(L, -1);
-        EmmyFacade::Get().SendLog(LogType::Error, "Error in 'print': %s", str);
-        lua_pop(L, 1); // 清除错误消息
-    }
-    return 0; // 返回值数量
+//emmy.override_lua_print(): void
+int override_lua_print(lua_State *L) {
+    lua_pushcfunction(L, hook_print); // 将自定义函数压入栈顶
+    lua_setglobal(L, "print");          // 将栈顶函数设置为全局的 print
+	return 0;
 }
 
 int gc(lua_State* L)

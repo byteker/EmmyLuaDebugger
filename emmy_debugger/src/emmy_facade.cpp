@@ -138,6 +138,23 @@ bool EmmyFacade::TcpConnect(lua_State *L, const std::string &host, int port, std
 	return suc;
 }
 
+bool EmmyFacade::TryTcpConnect(lua_State *L, const std::string &host, int port, std::string &err) {
+	Destroy();
+
+	_emmyDebuggerManager.AddDebugger(L);
+
+	SetReadyHook(L);
+
+	const auto c = std::make_shared<SocketClientTransporter>();
+	transporter = c;
+	// c->SetHandler(shared_from_this());
+	const auto suc = c->Connect(host, port, err);
+	if (suc) {
+		WaitIDE(true);
+	}
+	return suc;
+}
+
 bool EmmyFacade::PipeListen(lua_State *L, const std::string &name, std::string &err) {
 	Destroy();
 

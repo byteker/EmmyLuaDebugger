@@ -32,8 +32,10 @@ static const luaL_Reg lib[] = {
 	{"stop", stop},
 	{"tcpSharedListen", tcpSharedListen},
 	{"registerTypeName", registerTypeName},
-	{"redirectPrint", redirectPrint},
+	{"printConsole", printConsole},
 	{"tryTcpConnect", tryTcpConnect},
+	{"hook_print", hook_print},
+	{"override_lua_print", override_lua_print},
 	{nullptr, nullptr}
 };
 
