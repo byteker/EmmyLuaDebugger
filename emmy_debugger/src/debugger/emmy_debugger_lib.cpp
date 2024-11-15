@@ -153,6 +153,7 @@ int printConsole(lua_State* L) {
 	const auto type = static_cast<LogType>(lua_tonumber(L, 1));
 	const auto output = lua_tostring(L, 2);
 	EmmyFacade::Get().SendLog(type, output);
+	return 0;
 }
 
 //emmy.hook_print(...): void
