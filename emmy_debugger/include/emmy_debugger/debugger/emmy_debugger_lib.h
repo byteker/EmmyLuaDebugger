@@ -11,6 +11,9 @@ int tcpListen(struct lua_State* L);
 // emmy.tcpConnect(host: string, port: int): bool
 int tcpConnect(lua_State* L);
 
+// emmy.tryTcpConnect(host: string, port: int): bool
+int tryTcpConnect(lua_State* L);
+
 // emmy.pipeListen(pipeName: string): bool
 int pipeListen(lua_State* L);
 
@@ -31,8 +34,9 @@ int stop(lua_State* L);
 // emmy.registerTypeName(typeName: string): bool
 int registerTypeName(lua_State* L);
 
-//emmy.captureOutput(): void
-int captureOutput(lua_State* L);
+//emmy.redirectPrint(): void
+int redirectPrint(lua_State* L);
+
 
 bool install_emmy_debugger(struct lua_State* L);
 
