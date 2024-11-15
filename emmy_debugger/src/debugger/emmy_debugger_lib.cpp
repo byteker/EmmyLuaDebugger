@@ -49,21 +49,6 @@ int tcpConnect(lua_State* L)
 	return 2;
 }
 
-// emmy.tryTcpConnect(host: string, port: int): bool
-int tryTcpConnect(lua_State* L)
-{
-	luaL_checkstring(L, 1);
-	std::string err;
-	const auto host = lua_tostring(L, 1);
-	luaL_checknumber(L, 2);
-	const auto port = lua_tointeger(L, 2);
-	const auto suc = EmmyFacade::Get().TryTcpConnect(L, host, static_cast<int>(port), err);
-	lua_pushboolean(L, suc);
-	if (suc) return 1;
-	// lua_pushstring(L, err.c_str());
-	return 2;
-}
-
 // emmy.pipeListen(pipeName: string): bool
 int pipeListen(lua_State* L)
 {
@@ -146,6 +131,21 @@ int registerTypeName(lua_State* L)
 	return 2;
 }
 
+// emmy.tryTcpConnect(host: string, port: int): bool
+int tryTcpConnect(lua_State* L)
+{
+	luaL_checkstring(L, 1);
+	std::string err;
+	const auto host = lua_tostring(L, 1);
+	luaL_checknumber(L, 2);
+	const auto port = lua_tointeger(L, 2);
+	const auto suc = EmmyFacade::Get().TryTcpConnect(L, host, static_cast<int>(port), err);
+	lua_pushboolean(L, suc);
+	if (suc) return 1;
+	lua_pushstring(L, err.c_str());
+	return 2;
+}
+
 //emmy.printConsole(type:LogType,output:string): void
 int printConsole(lua_State* L) {
 	luaL_checknumber(L, 1);
@@ -153,32 +153,6 @@ int printConsole(lua_State* L) {
 	const auto type = static_cast<LogType>(lua_tonumber(L, 1));
 	const auto output = lua_tostring(L, 2);
 	EmmyFacade::Get().SendLog(type, output);
-	return 0;
-}
-
-//emmy.hook_print(...): void
-int hook_print(lua_State* L) {
-  int n = lua_gettop(L);  /* number of arguments */
-  int i;
-  lua_getglobal(L, "tostring");
-  std::string output;
-  for (i=1; i<=n; i++) {
-    const char *s;
-    size_t l;
-    lua_pushvalue(L, -1);  /* function to be called */
-    lua_pushvalue(L, i);   /* value to print */
-    lua_call(L, 1, 1);
-    s = lua_tolstring(L, -1, &l);  /* get result */
-	output += s;
-    lua_pop(L, 1);  /* pop result */
-  }
-  return 0;
-}
-
-//emmy.override_lua_print(): void
-int override_lua_print(lua_State *L) {
-    lua_pushcfunction(L, hook_print); // 将自定义函数压入栈顶
-    lua_setglobal(L, "print");          // 将栈顶函数设置为全局的 print
 	return 0;
 }
 
