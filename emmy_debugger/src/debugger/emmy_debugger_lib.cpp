@@ -130,6 +130,36 @@ int registerTypeName(lua_State* L)
 	return 2;
 }
 
+//emmy.captureOutput(): void
+int captureOutput(lua_State* L)
+{
+    lua_pushcfunction(L, custom_print); // 将自定义函数压入栈顶
+    lua_setglobal(L, "print");          // 将栈顶函数设置为全局的 print
+	return 0;
+}
+
+int custom_print(lua_State *L) {
+    int nargs = lua_gettop(L); // 获取传入参数的个数
+    for (int i = 1; i <= nargs; i++) {
+        if (luaL_checkstring(L, i)) { // 检查参数是否为字符串
+            const char *str = lua_tostring(L, i);
+            // 将输出重定向到调试接口（这里简单打印到 stderr）
+            // fprintf(stderr, "[Captured]: %s\n", str);
+			EmmyFacade::Get().SendLog(LogType::Info,"%s\n",str);
+        } else {
+            // 如果不是字符串，调用 Lua 的 tostring 函数
+            lua_getglobal(L, "tostring");
+            lua_pushvalue(L, i);
+            lua_call(L, 1, 1);
+            const char *str = lua_tostring(L, -1);
+            // fprintf(stderr, "[Captured]: %s\n", str);
+			EmmyFacade::Get().SendLog(LogType::Info,"%s\n",str);
+            lua_pop(L, 1); // 弹出 tostring 的返回值
+        }
+    }
+    return 0; // 返回值数量
+}
+
 int gc(lua_State* L)
 {
 	EmmyFacade::Get().OnLuaStateGC(L);
